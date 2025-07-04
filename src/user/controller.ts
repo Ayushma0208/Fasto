@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { findUserByEmail, createUser } from "./model";
+import { generateToken } from "../middleware/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
 
@@ -26,28 +27,18 @@ export const userSignup: RequestHandler = async (req, res): Promise<void> => {
 // Login controller
 export const userLogin: RequestHandler = async (req, res): Promise<void> => {
   const { email, password } = req.body;
-
-  // Get user
   const result = await findUserByEmail(email);
   const user = result.rows[0];
   if (!user) {
     res.status(401).json({ message: "Invalid credentials" });
     return;
   }
-
-  // Verify password
   const isValid = await argon2.verify(user.password_hash, password);
   if (!isValid) {
     res.status(401).json({ message: "Invalid credentials" });
     return;
   }
-
-  // Generate token
-  const token = jwt.sign(
-    { id: user.user_id, email: user.email, role: "user" },
-    JWT_SECRET,
-    { expiresIn: "24h" }
-  );
+  const token = generateToken(user);
 
   res.json({ message: "Login successful", token });
 };
