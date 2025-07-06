@@ -13,6 +13,3 @@ export const createAdmin = async (full_name: string, email: string, password_has
   );
   return result.rows[0];
 };
-
-
-//testing
