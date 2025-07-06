@@ -1,32 +1,47 @@
 import argon2 from "argon2";
+import { RequestHandler } from "express";
 import { createAdmin, findAdminByEmail } from "./model";
 import { Request, Response } from "express";
+import { generateToken } from "../middleware/auth";
 
-export const adminSignup = async (req: Request, res: Response) => {
+export const adminSignup : RequestHandler = async (req, res): Promise<void> => {
   try {
     const { full_name, email, password, phone } = req.body;
 
     if (!full_name || !email || !password || !phone) {
       res.status(400).json({ message: 'All fields are required.' });
-      return;
+      return ;
     }
-
     const existingAdmin = await findAdminByEmail(email);
     if (existingAdmin) {
       res.status(400).json({ message: 'Admin already exists with this email.' });
-      return;
+      return ;
     }
-
     const hashedPassword = await argon2.hash(password);
     const newAdmin = await createAdmin(full_name, email, hashedPassword, phone);
-
-    res.status(201).json({
-      message: 'Admin created successfully.',
-      admin: newAdmin,
-    });
+    res.status(201).json({message: 'Admin created successfully.',admin: newAdmin,});
+    return ;
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error during signup.' });
   }
+};
+
+export const adminLogin: RequestHandler = async (req, res): Promise<void> => {
+  const { email, password } = req.body;
+  const result = await findAdminByEmail(email);
+  const user = result.rows[0];
+  if (!user) {
+  res.status(401).json({ message: "Invalid credentials" });
+  return;
+  }
+  const isValid = await argon2.verify(user.password_hash, password);
+  if (!isValid) {
+   res.status(401).json({ message: "Invalid credentials" });
+   return;
+  }
+  const token = generateToken(user);
+
+  res.json({ message: "Login successful", token });
 };
 

@@ -1,9 +1,8 @@
 import db from "../config/db";
 import { QueryResult } from "pg";
 
-export const findAdminByEmail = async (email: string) => {
-  const result = await db.query('SELECT * FROM admins WHERE email = $1', [email]);
-  return result.rows[0];
+export const findAdminByEmail = async (email: string): Promise<QueryResult> => {
+  return await db.query("SELECT * FROM admins WHERE email = $1", [email]);
 };
 
 export const createAdmin = async (full_name: string, email: string, password_hash: string, phone?: string) => {
