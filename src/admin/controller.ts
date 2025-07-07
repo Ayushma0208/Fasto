@@ -45,5 +45,3 @@ export const adminLogin: RequestHandler = async (req, res): Promise<void> => {
   res.json({ message: "Login successful", token });
 };
 
-
-//admin panel
