@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { RequestHandler } from "express";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
-import { findUserByEmail, createUser } from "./model";
+import { findUserByEmail, createUser, updateUserById } from "./model";
 import { generateToken } from "../middleware/auth";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
@@ -38,7 +38,45 @@ export const userLogin: RequestHandler = async (req, res): Promise<void> => {
     res.status(401).json({ message: "Invalid credentials" });
     return;
   }
-  const token = generateToken(user);
+  const token = generateToken({ id: user.id, email: user.email });
 
   res.json({ message: "Login successful", token });
 };
+
+export const userUpdate: RequestHandler = async (req, res): Promise<void> => {
+  const id = req.user?.id;
+  console.log("id>>>>>",id)
+  if (!id) {
+    res.status(401).json({ message: "Unauthorized: Missing user ID" });
+    return;
+  }
+
+  const { name, email, phone, address } = req.body;
+
+  // Only include non-empty values
+  const fieldsToUpdate: { [key: string]: string } = {};
+  if (name) fieldsToUpdate.name = name;
+  if (email) fieldsToUpdate.email = email;
+  if (phone) fieldsToUpdate.phone = phone;
+  if(address) fieldsToUpdate.address = address;
+
+  if (Object.keys(fieldsToUpdate).length === 0) {
+    res.status(400).json({ message: "No valid fields to update" });
+    return;
+  }
+
+  try {
+    const result = await updateUserById(id, fieldsToUpdate);
+
+    if (result.rowCount === 0) {
+      res.status(404).json({ message: "User not found or no update performed" });
+      return;
+    }
+
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+
+}

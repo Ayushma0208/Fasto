@@ -18,3 +18,23 @@ export const createUser = async (
     [full_name, email, password_hash, phone, address]
   );
 };
+
+export const updateUserById = async (
+  id: number,
+  fields: { [key: string]: string }
+) => {
+  const updates = [];
+  const values = [];
+  let i = 1;
+
+  for (const key in fields) {
+    updates.push(`${key} = $${i}`);
+    values.push(fields[key]);
+    i++;
+  }
+
+  const query = `UPDATE users SET ${updates.join(", ")} WHERE id = $${i}`;
+  values.push(id);
+
+  return db.query(query, values);
+};
