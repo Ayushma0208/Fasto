@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import { RequestHandler } from "express";
-import { createAdmin, findAdminByEmail } from "./model";
+import { createAdmin, findAdminByEmail, getAllUsersModel } from "./model";
 import { Request, Response } from "express";
 import { generateToken } from "../middleware/auth";
 
@@ -44,4 +44,15 @@ export const adminLogin: RequestHandler = async (req, res): Promise<void> => {
 
   res.json({ message: "Login successful", token });
 };
+
+
+export const getAllUsers : RequestHandler = async (req, res): Promise<void> => {
+  try {
+    const users = await getAllUsersModel();
+    res.status(200).json({ users });
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
 

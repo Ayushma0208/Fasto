@@ -12,3 +12,8 @@ export const createAdmin = async (full_name: string, email: string, password_has
   );
   return result.rows[0];
 };
+
+export const getAllUsersModel = async() =>{
+  const result = await db.query("SELECT * FROM users ORDER BY created_at DESC");
+  return result.rows;
+}
