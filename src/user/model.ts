@@ -14,7 +14,7 @@ export const createUser = async (
 ): Promise<QueryResult> => {
   return await db.query(
     `INSERT INTO users (full_name, email, password_hash, phone, address)
-     VALUES ($1, $2, $3, $4, $5) RETURNING user_id, full_name, email`,
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, full_name, email`,
     [full_name, email, password_hash, phone, address]
   );
 };

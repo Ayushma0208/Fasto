@@ -1,11 +1,16 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
-// Extend Express Request interface to include 'user'
+import express from "express";
+
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: {
+        id: number;
+        email: string;
+        role: string;
+      };
     }
   }
 }
@@ -14,6 +19,14 @@ export const generateToken = (user: { id: number; email: string; role?: string }
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     process.env.JWT_SECRET || "default_secret",
+    { expiresIn: "24h" }
+  );
+};
+
+export const generateAdminToken = (user: { id: number; email: string; role?: string }) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    process.env.ADMIN_JWT_SECRET || "default_secret",
     { expiresIn: "24h" }
   );
 };
@@ -32,7 +45,7 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret") as {
       id: number;
       email: string;
-      role?: string;
+      role: string; 
     };
 
     req.user = decoded;
@@ -42,10 +55,13 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
   }
 };
 
+type Middleware = (req: Request, res: Response, next: NextFunction) => void;
 
 export const authorizeRoles = (...allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user || !allowedRoles.includes(req.user.role)) {
+    const user = req.user as { role?: string }; // ✅ Type-cast here
+
+    if (!user || !user.role || !allowedRoles.includes(user.role)) {
       return res.status(403).json({ message: "Access denied: unauthorized role" });
     }
     next();

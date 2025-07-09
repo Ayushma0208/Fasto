@@ -4,6 +4,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { findUserByEmail, createUser, updateUserById } from "./model";
 import { generateToken } from "../middleware/auth";
+import sendEmail from "../utils/sendEmail";
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
 
@@ -20,7 +21,16 @@ export const userSignup: RequestHandler = async (req, res): Promise<void> => {
   const hashedPassword = await argon2.hash(password);
   const result = await createUser(full_name, email, hashedPassword, phone, address);
 
-  res.status(201).json({ message: "Signup successful", user: result.rows[0] });
+   await sendEmail(
+      email,
+      "Welcome to Fasto Admin!",
+      `Hi ${full_name},\n\nWelcome to Fasto Admin Panel.\n\nRegards,\nTeam Fasto`
+    );
+
+    res.status(201).json({
+      message: "Admin created successfully. Email sent.",
+      admin: result.rows[0],
+    });
   return;
 };
 
