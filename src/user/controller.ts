@@ -52,8 +52,6 @@ export const userUpdate: RequestHandler = async (req, res): Promise<void> => {
   }
 
   const { name, email, phone, address } = req.body;
-
-  // Only include non-empty values
   const fieldsToUpdate: { [key: string]: string } = {};
   if (name) fieldsToUpdate.name = name;
   if (email) fieldsToUpdate.email = email;
