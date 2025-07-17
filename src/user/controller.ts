@@ -86,5 +86,5 @@ export const userUpdate: RequestHandler = async (req, res): Promise<void> => {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-
+//testing
 }
