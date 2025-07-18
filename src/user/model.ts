@@ -44,3 +44,35 @@ export const findUserById = async(id:string | number) =>{
 export const updateUserPassword = async(id: string | number, hashedPassword: string) =>{
   return db.query('UPDATE users SET password_hash = $1 WHERE id = $2',[hashedPassword, id])
 }
+
+
+
+export const saveResetToken = async (email: string, token: string, expiry: Date) => {
+  await db.query(
+    'UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE email = $3',
+    [token, expiry, email]
+  );
+};
+
+export const findUserByToken = async (token: string) => {
+  const result = await db.query(
+    'SELECT * FROM users WHERE reset_token = $1 AND reset_token_expiry > NOW()',
+    [token]
+  );
+  return result.rows[0];
+};
+
+export const updatePasswordByToken = async (token: string, hashedPassword: string) => {
+  await db.query(
+    `UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expiry = NULL 
+     WHERE reset_token = $2`,
+    [hashedPassword, token]
+  );
+}
+
+export const updateUserPasswordById = async (userId: string, hashedPassword: string) => {
+  await db.query(
+    'UPDATE users SET password_hash = $1 WHERE id = $2',
+    [hashedPassword, userId]
+  );
+};

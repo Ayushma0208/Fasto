@@ -2,9 +2,11 @@ import { Request, Response } from "express";
 import { RequestHandler } from "express";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
-import { findUserByEmail, createUser, updateUserById, findUserById, updateUserPassword } from "./model";
-import { generateToken } from "../middleware/auth";
+import { findUserByEmail, createUser, updateUserById, findUserById, updateUserPassword, saveResetToken, findUserByToken, updatePasswordByToken, updateUserPasswordById } from "./model";
+import { generateResetToken, generateToken } from "../middleware/auth";
 import sendEmail from "../utils/sendEmail";
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
 
@@ -113,3 +115,56 @@ export const changePassword : RequestHandler = async (req, res): Promise<void> =
     res.status(500).json({ message: "Internal server error" });
   }
 }
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Step 1: Forgot password
+export const forgotPassword: RequestHandler = async (req, res): Promise<void> => {
+  const { email } = req.body;
+
+  try {
+    const userResult = await findUserByEmail(email);
+    const user = userResult.rows[0];
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    // Use JWT token now
+    const token = generateResetToken(user.id);
+    const resetLink = `http://localhost:5000/reset-password/${token}`;
+
+    await transporter.sendMail({
+      to: email,
+      subject: 'Reset Your Password',
+      html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Token is valid for 1 hour.</p>`,
+    });
+
+    res.status(200).json({ message: 'Password reset link sent to email' });
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const resetPasswordWithToken: RequestHandler = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey') as { userId: string };
+
+    const hash = await argon2.hash(newPassword);
+    await updateUserPasswordById(decoded.userId, hash);
+
+    res.status(200).json({ message: 'Password has been reset successfully' });
+  } catch (err) {
+    console.error('Invalid or expired token:', err);
+    res.status(400).json({ message: 'Invalid or expired token' });
+  }
+};

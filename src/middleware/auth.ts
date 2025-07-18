@@ -67,3 +67,21 @@ export const authorizeRoles = (...allowedRoles: string[]) => {
     next();
   };
 };
+
+export const generateResetToken = (userId: number | string) => {
+  const token = jwt.sign(
+    { userId }, 
+    process.env.JWT_SECRET || 'your_jwt_secret', 
+    { expiresIn: '1h' }
+  );
+  return token;
+};
+
+// Example usage:
+const exampleUser = { id: 1 }; // Define a user object with an id
+const token = generateResetToken(exampleUser.id);
+console.log('Reset Token:', token);
+
+// Now you can send this in email like:
+const resetLink = `http://localhost:5000/reset-password/${token}`;
+console.log('Reset link:', resetLink);
