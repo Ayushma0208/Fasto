@@ -61,10 +61,9 @@ export const userUpdate: RequestHandler = async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, email, phone, address } = req.body;
+  const { name, phone, address } = req.body;
   const fieldsToUpdate: { [key: string]: string } = {};
   if (name) fieldsToUpdate.name = name;
-  if (email) fieldsToUpdate.email = email;
   if (phone) fieldsToUpdate.phone = phone;
   if(address) fieldsToUpdate.address = address;
 
@@ -86,5 +85,4 @@ export const userUpdate: RequestHandler = async (req, res): Promise<void> => {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-//testing
 }

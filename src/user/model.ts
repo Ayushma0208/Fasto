@@ -32,9 +32,7 @@ export const updateUserById = async (
     values.push(fields[key]);
     i++;
   }
-
   const query = `UPDATE users SET ${updates.join(", ")} WHERE id = $${i}`;
   values.push(id);
-
   return db.query(query, values);
 };
