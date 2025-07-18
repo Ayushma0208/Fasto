@@ -36,3 +36,11 @@ export const updateUserById = async (
   values.push(id);
   return db.query(query, values);
 };
+
+export const findUserById = async(id:string | number) =>{
+  return db.query('SELECT * FROM users WHERE id = $1',[id])
+}
+
+export const updateUserPassword = async(id: string | number, hashedPassword: string) =>{
+  return db.query('UPDATE users SET password_hash = $1 WHERE id = $2',[hashedPassword, id])
+}

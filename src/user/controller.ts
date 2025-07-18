@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { RequestHandler } from "express";
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
-import { findUserByEmail, createUser, updateUserById } from "./model";
+import { findUserByEmail, createUser, updateUserById, findUserById, updateUserPassword } from "./model";
 import { generateToken } from "../middleware/auth";
 import sendEmail from "../utils/sendEmail";
 
@@ -81,6 +81,33 @@ export const userUpdate: RequestHandler = async (req, res): Promise<void> => {
     }
 
     res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const changePassword : RequestHandler = async (req, res): Promise<void> => {
+  const id = req.user?.id;
+  const { old_password, new_password } = req.body;
+  if (id === undefined) {
+    res.status(401).json({ message: "Unauthorized: Missing user ID" });
+    return;
+  }
+  try {
+    const userResult = await findUserById(id);
+    const user = userResult.rows[0];
+    if(!user){
+      res.status(400).json({message : "user not found"})
+      return;
+    }
+    const isValid = await argon2.verify(user.password_hash, old_password)
+    if(!isValid){
+      res.status(400).json({message:"Old Password in incorrect"})
+    }
+    const hashedPassword = await argon2.hash(new_password)
+    await updateUserPassword(id,hashedPassword);
+    res.status(200).json({ message: 'Password reset successfully' });
   } catch (error) {
     console.error("Error updating user:", error);
     res.status(500).json({ message: "Internal server error" });
