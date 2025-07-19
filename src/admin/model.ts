@@ -25,3 +25,10 @@ export const getUserBlockStatus = async (userId: string | number) => {
 export const blockedId = async (userId: string | number) => {
   return await db.query("UPDATE users SET is_blocked = TRUE WHERE id = $1 RETURNING *", [userId]);
 };
+
+export const unblockUserById = async (userId: string | number) => {
+  return await db.query(
+    'UPDATE users SET is_blocked = FALSE WHERE id = $1 RETURNING *',
+    [userId]
+  );
+};
