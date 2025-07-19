@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import { RequestHandler } from "express";
-import { createAdmin, findAdminByEmail, getAllUsersModel } from "./model";
+import { blockedId, createAdmin, findAdminByEmail, getAllUsersModel, getUserBlockStatus } from "./model";
 import { Request, Response } from "express";
 import { generateToken } from "../middleware/auth";
 import { generateTokenAdmin } from "../middleware/adminAuth";
@@ -53,6 +53,35 @@ export const getAllUsers : RequestHandler = async (req, res): Promise<void> => {
     res.status(200).json({ users });
   } catch (err) {
     console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const blockUser : RequestHandler = async (req, res): Promise<void> => {
+  const userId = req.params.id;
+ 
+  try {
+      const check = await getUserBlockStatus(userId);
+
+    if (check.rowCount === 0) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const isBlocked = check.rows[0].is_blocked;
+
+    if (isBlocked) {
+      res.status(400).json({ message: 'User is already blocked' });
+      return;
+    }
+    const result = await blockedId(userId);
+      if (result.rowCount === 0) {
+       res.status(404).json({ message: 'User not found' });
+       return;
+    }
+    res.status(200).json({ message: "User blocked successfully", user: result.rows[0] });
+  } catch (error) {
+    console.error("Error blocking user:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }

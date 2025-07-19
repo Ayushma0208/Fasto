@@ -1,5 +1,5 @@
 import express from 'express';
-import { adminLogin, adminSignup, getAllUsers } from './controller';
+import { adminLogin, adminSignup, blockUser, getAllUsers } from './controller';
 // import { authorizeRoles, verifyToken } from '../middleware/auth';
 import { isAdmin } from '../middleware/adminAuth';
 
@@ -10,5 +10,7 @@ router.post("/signup", adminSignup);
 router.post("/login", adminLogin);
 
 router.get('/getAllUsers', isAdmin, getAllUsers)
+
+router.post('/block/:id', blockUser)
 
 export default router

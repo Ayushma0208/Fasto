@@ -17,3 +17,11 @@ export const getAllUsersModel = async() =>{
   const result = await db.query("SELECT * FROM users ORDER BY created_at DESC");
   return result.rows;
 }
+
+export const getUserBlockStatus = async (userId: string | number) => {
+  return await db.query('SELECT is_blocked FROM users WHERE id = $1', [userId]);
+};
+
+export const blockedId = async (userId: string | number) => {
+  return await db.query("UPDATE users SET is_blocked = TRUE WHERE id = $1 RETURNING *", [userId]);
+};
