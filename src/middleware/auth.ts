@@ -77,8 +77,7 @@ export const generateResetToken = (userId: number | string) => {
   return token;
 };
 
-// Example usage:
-const exampleUser = { id: 1 }; // Define a user object with an id
+const exampleUser = { id: 1 }; 
 const token = generateResetToken(exampleUser.id);
 console.log('Reset Token:', token);
 

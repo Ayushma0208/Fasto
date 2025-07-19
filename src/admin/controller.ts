@@ -3,6 +3,7 @@ import { RequestHandler } from "express";
 import { createAdmin, findAdminByEmail, getAllUsersModel } from "./model";
 import { Request, Response } from "express";
 import { generateToken } from "../middleware/auth";
+import { generateTokenAdmin } from "../middleware/adminAuth";
 
 export const adminSignup : RequestHandler = async (req, res): Promise<void> => {
   try {
@@ -40,7 +41,7 @@ export const adminLogin: RequestHandler = async (req, res): Promise<void> => {
    res.status(401).json({ message: "Invalid credentials" });
    return;
   }
-  const token = generateToken(user);
+  const token = generateTokenAdmin(user);
 
   res.json({ message: "Login successful", token });
 };
