@@ -6,7 +6,7 @@ export const generateTokenAdmin = (user: any) => {
     {
       id: user.id,
       email: user.email,
-      role: 'admin', // ✅ THIS IS IMPORTANT
+      role: 'admin', 
     },
     process.env.JWT_SECRET!,
     {
