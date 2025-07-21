@@ -59,7 +59,7 @@ type Middleware = (req: Request, res: Response, next: NextFunction) => void;
 
 export const authorizeRoles = (...allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as { role?: string }; // ✅ Type-cast here
+    const user = req.user as { role?: string }; 
 
     if (!user || !user.role || !allowedRoles.includes(user.role)) {
       return res.status(403).json({ message: "Access denied: unauthorized role" });
