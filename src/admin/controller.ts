@@ -10,12 +10,12 @@ export const adminSignup : RequestHandler = async (req, res): Promise<void> => {
     const { full_name, email, password, phone } = req.body;
 
     if (!full_name || !email || !password || !phone) {
-      res.status(400).json({ message: 'All fields are required.' });
+      res.status(402).json({ message: 'All fields are required.' });
       return ;
     }
     const existingAdmin = await findAdminByEmail(email);
     if (existingAdmin) {
-      res.status(400).json({ message: 'Admin already exists with this email.' });
+      res.status(401).json({ message: 'Admin already exists with this email.' });
       return ;
     }
     const hashedPassword = await argon2.hash(password);
@@ -67,9 +67,7 @@ export const blockUser : RequestHandler = async (req, res): Promise<void> => {
       res.status(404).json({ message: 'User not found' });
       return;
     }
-
     const isBlocked = check.rows[0].is_blocked;
-
     if (isBlocked) {
       res.status(200).json({ message: 'User is already blocked' });
       return;
