@@ -47,11 +47,10 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
       email: string;
       role: string; 
     };
-
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
+    res.status(402).json({ message: "Invalid token" });
   }
 };
 

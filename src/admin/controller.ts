@@ -104,15 +104,13 @@ export const unblockUser: RequestHandler = async (req, res): Promise<void> => {
       res.status(200).json({ message: 'User is already unblocked' });
       return;
     }
-
     const result = await unblockUserById(userId);
-
     res.status(200).json({
       message: 'User unblocked successfully',
       user: result.rows[0]
     });
   } catch (error) {
     console.error('Error unblocking user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(501).json({ message: 'Internal server error' });
   }
 };
