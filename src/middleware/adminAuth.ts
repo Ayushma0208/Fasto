@@ -32,7 +32,6 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction): void =
        res.status(403).json({ message: 'Access denied. Admins only.' });
        return
     }
-
     req.user = decoded;
     next();
   } catch (err) {
