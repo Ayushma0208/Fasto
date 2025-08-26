@@ -43,7 +43,7 @@ export const adminLogin: RequestHandler = async (req, res): Promise<void> => {
   }
   const token = generateTokenAdmin(user);
 
-  res.json({ message: "Login successful", token });
+  res.json({ message: "Login successful :", token });
 };
 
 
